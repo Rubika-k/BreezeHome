@@ -1,25 +1,31 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import electricianImg from "../assets/electrician.jpg";
+import plumberImg from "../assets/Plumber.jpg";
+import hvacImg from "../assets/HVAC.jpg";
+import bgImg from "../assets/backpic.jpg"; 
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
+  const navigate = useNavigate();
 const services = [
   {
     title: 'Electrical Services',
     description: 'Fixing wiring, fans, lighting and more.',
     rating: 4.5,
-    image: 'https://via.placeholder.com/300x200?text=Electrical',
+    image:  electricianImg,
   },
   {
     title: 'Plumbing Services',
     description: 'Leaks, pipelines, and drainage solutions.',
     rating: 4.7,
-    image: 'https://via.placeholder.com/300x200?text=Plumbing',
+    image: plumberImg,
   },
   {
     title: 'HVAC Services',
     description: 'AC installation, repairs, and maintenance.',
     rating: 4.9,
-    image: 'https://via.placeholder.com/300x200?text=HVAC',
+    image: hvacImg,
   },
 ];
   const professionals = [
@@ -30,7 +36,7 @@ const services = [
       rating: '4.9',
       jobs: '250+',
       years: '5',
-      image: 'https://randomuser.me/api/portraits/women/44.jpg',
+      image: '',
     },
     {
       name: 'Sarah Williams',
@@ -39,7 +45,7 @@ const services = [
       rating: '4.8',
       jobs: '180+',
       years: '3',
-      image: 'https://randomuser.me/api/portraits/women/68.jpg',
+      image:'',
     },
     {
       name: 'David Rodriguez',
@@ -48,7 +54,7 @@ const services = [
       rating: '5.0',
       jobs: '300+',
       years: '7',
-      image: 'https://randomuser.me/api/portraits/men/43.jpg',
+      image:'',
     }
   ];
 
@@ -56,7 +62,11 @@ const services = [
     <div className="font-sans">
       <Navbar />
         {/* Hero Section */} 
-        <section className="bg-gradient-to-r from-blue-600 to-blue-400 text-white py-20"> 
+        <section className="bg-gradient-to-r from-blue-600 to-blue-400 text-white py-20" style={{
+           backgroundImage: `url(${bgImg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+         }} > 
         <div className="max-w-6xl mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Your Trusted Home Service Professionals</h1>
           <p className="text-lg md:text-xl mb-6">Connecting homeowners with local workers for all your home service needs</p>
@@ -66,7 +76,7 @@ const services = [
         </div>
       </section>       
       {/* Our Services Section */}
-      <section className="py-16 bg-gray-100 text-center">
+      <section id="services" className="py-16 bg-gray-100 text-center">
         <h2 className="text-3xl font-bold mb-2">Our Services</h2>
         <p className="mb-10 text-gray-600">Browse our most popular home service categories</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
@@ -81,8 +91,8 @@ const services = [
                 <h3 className="font-semibold text-lg mb-2 text-gray-800">{service.title}</h3>
                 <p className="text-gray-600 text-sm mb-3">{service.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-yellow-500 font-semibold">★ {service.rating}</span>
-                  <button className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 text-sm">
+                  {/* <span className="text-yellow-500 font-semibold">★ {service.rating}</span> */}
+                  <button className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 text-sm"  onClick={() => navigate("/booking")}>
                     Book Now
                   </button>
                 </div>
@@ -93,7 +103,7 @@ const services = [
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-blue-50 py-16 text-center">
+      <section id="how-it-works" className="bg-blue-50 py-16 text-center">
         <h2 className="text-3xl font-bold mb-4">How It Works</h2>
         <p className="text-gray-600 mb-10">Get your home service needs taken care of in just a few simple steps</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto px-6">
@@ -114,7 +124,7 @@ const services = [
       </section>
 
       {/* Featured Professionals Section */}
-      <section className="py-16 bg-white text-center">
+      <section id="professionals" className="py-16 bg-white text-center">
         <h2 className="text-3xl font-bold mb-2">Featured Professionals</h2>
         <p className="text-gray-600 mb-10">Meet some of our top-rated service providers</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-6">
@@ -138,7 +148,7 @@ const services = [
       </section>
 
       {/* Testimonials Section */}
-      <section className="bg-blue-50 py-16 text-center">
+      <section id="testimonials" className="bg-blue-50 py-16 text-center">
         <h2 className="text-3xl font-bold mb-4">What Our Customers Say</h2>
         <p className="text-gray-600 mb-10">Hear from homeowners who’ve used our service</p>
         <div className="max-w-xl mx-auto bg-white shadow-md rounded-md p-6">

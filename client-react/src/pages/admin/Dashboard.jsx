@@ -1,266 +1,426 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import axios from '../../axiosConfig';
 
-const stats = [
-  { label: 'Total Bookings', value: 3, sub: '1 completed', icon: '📅' },
-  { label: 'Active Bookings', value: 2, sub: 'In progress or pending', icon: '⏱️' },
-  { label: 'Total Spent', value: '₹3,500', sub: 'This year', icon: '💳' },
-  { label: 'Favorite Workers', value: 2, sub: 'Saved for quick booking', icon: '❤️' },
-];
+const adminToken = localStorage.getItem('token');
 
-const servicesSample = [
-  {  
-    name: 'Electrician',
-    desc: 'Electrical repairs and installations',
-    rating: 4.8,
-    workers: 45,
-    price: 500,
-  },
-  {
-    name: 'Plumber',
-    desc: 'Plumbing services and repairs',
-    rating: 4.7,
-    workers: 38,
-    price: 400,
-  },
-  {
-    name: 'House Cleaning',
-    desc: 'Professional house cleaning services',
-    rating: 4.9,
-    workers: 62,
-    price: 800,
-  }
-];
+function StatCard({ title, value, subtitle }) {
+  return (
+    <div className="bg-white p-6 rounded-lg shadow">
+      <h2 className="text-sm text-gray-600">{title}</h2>
+      <p className="text-3xl font-bold">{value}</p>
+      <p className="text-xs text-gray-500">{subtitle}</p>
+    </div>
+  );
+}
 
-export default function Admin() {
-  const [activeTab, setActiveTab] = useState('browse'); // browse | bookings | favorites | history | profile
-  const [services, setServices] = useState([]);
+export default function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  const [customers, setCustomers] = useState([]);
+  const [workers, setWorkers] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  const [searchUser, setSearchUser] = useState('');
+  const [searchWorker, setSearchWorker] = useState('');
+  const [newCategory, setNewCategory] = useState({ name: '', icon: '' });
 
   useEffect(() => {
-    // TODO: fetch your real services
-    // axios.get('/api/services').then(r => setServices(r.data));
-    setServices(servicesSample);
+    fetchAll();
   }, []);
 
+  const fetchAll = async () => {
+    await Promise.all([fetchCustomers(), fetchWorkers(), fetchBookings(), fetchCategories()]);
+  };
+
+  const fetchCustomers = async () => {
+    const res = await axios.get('/api/customers', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    setCustomers(res.data.users || []);
+  };
+
+  const fetchWorkers = async () => {
+    const res = await axios.get('/api/workers', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    setWorkers(res.data || []);
+  };
+
+  const fetchBookings = async () => {
+    const res = await axios.get('/api/admin/bookings', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    setBookings(res.data || []);
+  };
+
+  const fetchCategories = async () => {
+    const res = await axios.get('/api/categories');
+    setCategories(res.data || []);
+  };
+
+  // === Users ===
+  const handleDeleteUser = async (id) => {
+    if (!window.confirm('Delete this user?')) return;
+    await axios.delete(`/api/customers/${id}`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    fetchCustomers();
+  };
+
+  const filteredUsers = customers.filter((u) =>
+    u.fullName?.toLowerCase().includes(searchUser.toLowerCase())
+  );
+
+  // === Workers ===
+
+  const filteredWorkers = workers.filter((w) =>
+    w.fullName?.toLowerCase().includes(searchWorker.toLowerCase())
+  );
+const [newWorker, setNewWorker] = useState({
+  fullName: '',
+  category: '',
+  phone: '',
+});
+
+const handleWorkerChange = (e) => {
+  setNewWorker({ ...newWorker, [e.target.name]: e.target.value });
+};
+
+const handleAddWorker = async (e) => {
+  e.preventDefault();
+  await axios.post('/api/workers', newWorker, {
+    headers: { Authorization: `Bearer ${adminToken}` },
+  });
+  setNewWorker({ fullName: '', category: '', phone: '' });
+  fetchWorkers();
+};
+
+const handleDeleteWorker = async (id) => {
+  if (!window.confirm('Delete this worker?')) return;
+  await axios.delete(`/api/workers/${id}`, {
+    headers: { Authorization: `Bearer ${adminToken}` },
+  });
+  fetchWorkers();
+};
+
+  // === Bookings ===
+  const handleDeleteBooking = async (id) => {
+    if (!window.confirm('Delete this booking?')) return;
+    await axios.delete(`/api/bookings/${id}`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    fetchBookings();
+  };
+
+  // === Categories ===
+  const handleCategoryChange = (e) => {
+    setNewCategory({ ...newCategory, [e.target.name]: e.target.value });
+  };
+
+  const handleAddCategory = async (e) => {
+    e.preventDefault();
+    await axios.post('/api/categories', newCategory, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    setNewCategory({ name: '', icon: '' });
+    fetchCategories();
+  };
+
+  const handleDeleteCategory = async (id) => {
+    if (!window.confirm('Delete this category?')) return;
+    await axios.delete(`/api/categories/${id}`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    fetchCategories();
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-red-500">
       <Navbar />
-
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Welcome + Stats */}
-        <h1 className="text-2xl font-semibold mb-1">Welcome back, Sarah Johnson!</h1>
-        <p className="text-gray-600 mb-6">Manage your bookings and discover new services</p>
+        <h1 className="text-2xl font-bold mb-4 text-white">Admin Dashboard</h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((s, i) => (
-            <div key={i} className="bg-white rounded-lg shadow p-4 flex items-center">
-              <div className="text-3xl mr-4">{s.icon}</div>
-              <div>
-                <p className="text-sm text-gray-500">{s.label}</p>
-                <p className="text-xl font-bold">{s.value}</p>
-                <p className="text-xs text-gray-400">{s.sub}</p>
-              </div>
-            </div>
+        <div className="flex gap-4 mb-6">
+          {['dashboard', 'users', 'workers', 'bookings', 'services'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded ${
+                activeTab === tab
+                  ? 'bg-white text-blue-600 font-semibold'
+                  : 'bg-white bg-opacity-80 text-gray-700'
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
           ))}
         </div>
 
-        {/* Tabs */}
-        <nav className="bg-white rounded-md shadow mb-6">
-          <ul className="flex">
-            {[
-              ['browse', 'Browse Services'],
-              ['bookings', 'My Bookings'],
-              ['favorites', 'Favorites'],
-              ['history', 'History'],
-              ['profile', 'Profile'],
-            ].map(([key, label]) => (
-              <li
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={
-                  'cursor-pointer px-4 py-2 flex-1 text-center ' +
-                  (activeTab === key
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-100')
-                }
-              >
-                {label}
-              </li>
+        {/* Dashboard */}
+        {activeTab === 'dashboard' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <StatCard title="Total Users" value={customers.length} subtitle="Registered Users" />
+            <StatCard title="Total Workers" value={workers.length} subtitle="Service Workers" />
+            <StatCard title="Total Bookings" value={bookings.length} subtitle="Bookings Made" />
+            <StatCard title="Categories" value={categories.length} subtitle="Service Types" />
+          </div>
+        )}
+
+        {/* USERS */}
+        {activeTab === 'users' && (
+          <section className="bg-white rounded shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">Users</h2>
+            <input
+              type="text"
+              placeholder="Search users..."
+              className="p-2 border rounded mb-4 w-full"
+              value={searchUser}
+              onChange={(e) => setSearchUser(e.target.value)}
+            />
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-2">Name</th>
+                  <th className="p-2">Email</th>
+                  <th className="p-2">Phone</th>
+                  <th className="p-2">Role</th>
+                  <th className="p-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map((u) => (
+                  <tr key={u._id} className="border-t">
+                    <td className="p-2">{u.fullName}</td>
+                    <td className="p-2">{u.email}</td>
+                    <td className="p-2">{u.phone}</td>
+                    <td className="p-2">{u.role}</td>
+                    <td className="p-2">
+                      <button
+                        onClick={() => handleDeleteUser(u._id)}
+                        className="text-red-600 underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        )}
+
+        {/* WORKERS */}
+        {activeTab === 'workers' && (
+          <section className="bg-white rounded shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">Workers</h2>
+            <input
+              type="text"
+              placeholder="Search workers..."
+              className="p-2 border rounded mb-4 w-full"
+              value={searchWorker}
+              onChange={(e) => setSearchWorker(e.target.value)}
+            />
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-2">Name</th>
+                  <th className="p-2">Category</th>
+                  <th className="p-2">Phone</th>
+                  <th className="p-2">Verified</th>
+                  <th className="p-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredWorkers.map((w) => (
+                  <tr key={w._id} className="border-t">
+                    <td className="p-2">{w.fullName}</td>
+                    <td className="p-2">{w.category}</td>
+                    <td className="p-2">{w.phone}</td>
+                    <td className="p-2">{w.isVerified ? 'Yes' : 'No'}</td>
+                    <td className="p-2">
+                      <button
+                        onClick={() => handleDeleteWorker(w._id)}
+                        className="text-red-600 underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        )}
+
+        {/* BOOKINGS */}
+        {/* {activeTab === 'bookings' && (
+          <section className="bg-white rounded shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">Bookings</h2>
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-2">Service</th>
+                  <th className="p-2">Customer</th>
+                  <th className="p-2">Status</th>
+                  <th className="p-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookings.map((b) => (
+                  <tr key={b._id} className="border-t">
+                    <td className="p-2">{b.workTitle}</td>
+                    <td className="p-2">{b.userId?.fullName}</td>
+                    <td className="p-2">{b.status}</td>
+                    <td className="p-2">
+                      <button
+                        onClick={() => handleDeleteBooking(b._id)}
+                        className="text-red-600 underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        )} */}
+{/* === BOOKINGS TAB === */}
+{activeTab === 'bookings' && (
+  <section className="bg-white rounded shadow p-6">
+    <h2 className="text-lg font-semibold mb-4">All Bookings</h2>
+
+    {bookings.length === 0 ? (
+      <p className="text-gray-500">No bookings found.</p>
+    ) : (
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm border-collapse">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="p-2">User</th>
+              <th className="p-2">Title</th>
+              <th className="p-2">Date</th>
+              <th className="p-2">Time</th>
+              <th className="p-2">Status</th>
+              <th className="p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bookings.map((b) => (
+              <tr key={b._id} className="border-t">
+                <td className="p-2">{b.userId?.fullName || 'N/A'}</td>
+                <td className="p-2">{b.workTitle}</td>
+                <td className="p-2">{b.preferredDate}</td>
+                <td className="p-2">{b.preferredTime}</td>
+                <td className="p-2 font-semibold">{b.status}</td>
+                <td className="p-2 space-x-2">
+                  {b.status !== 'Accepted' && (
+                    <button
+                      onClick={() => updateStatus(b._id, 'Accepted')}
+                      className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+                    >
+                      Accept
+                    </button>
+                  )}
+                  {b.status !== 'Rejected' && (
+                    <button
+                      onClick={() => updateStatus(b._id, 'Rejected')}
+                      className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+                    >
+                      Reject
+                    </button>
+                  )}
+                  {b.status !== 'Completed' && (
+                    <button
+                      onClick={() => updateStatus(b._id, 'Completed')}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
+                    >
+                      Complete
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDeleteBooking(b._id)}
+                    className="text-gray-500 underline text-xs"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
             ))}
-          </ul>
-        </nav>
+          </tbody>
+        </table>
+      </div>
+    )}
+  </section>
+)}
 
-       
-        {activeTab === 'browse' && (
-          <section className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Available Services</h2>
-
-            <div className="flex items-center justify-between mb-4">
+        {/* SERVICES */}
+        {activeTab === 'services' && (
+          <section className="bg-white rounded shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">Service Categories</h2>
+            <form
+              onSubmit={handleAddCategory}
+              className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4"
+            >
               <input
                 type="text"
-                placeholder="Search services…"
-                className="border px-3 py-2 rounded w-1/3"
+                name="name"
+                placeholder="Category Name"
+                value={newCategory.name}
+                onChange={handleCategoryChange}
+                className="p-2 border rounded"
+                required
               />
-              <button className="bg-white border px-4 py-2 rounded hover:bg-gray-100">
-                Filter
+              <input
+                type="text"
+                name="icon"
+                placeholder="Icon (optional)"
+                value={newCategory.icon}
+                onChange={handleCategoryChange}
+                className="p-2 border rounded"
+              />
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                + Add
               </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {services.map((svc, i) => (
-                <div key={i} className="border rounded-lg p-4 flex flex-col justify-between">
-                  <div>
-                    <div className="w-12 h-12 bg-blue-100 rounded flex items-center justify-center mb-3">
-                     
-                      ⚙️
-                    </div>
-                    <h3 className="text-lg font-semibold">{svc.name}</h3>
-                    <p className="text-gray-500 text-sm">{svc.desc}</p>
-                    <div className="flex items-center text-sm text-gray-700 mt-2">
-                      ⭐ {svc.rating}&nbsp;&nbsp;|&nbsp;&nbsp;{svc.workers} workers
-                    </div>
-                    <div className="mt-2 text-green-600 font-bold">
-                      Starting from ₹{svc.price}
-                    </div>
-                  </div>
-                  <button className="mt-4 bg-black text-white py-2 rounded hover:opacity-90">
-                    + Book Now
-                  </button>
-                </div>
-              ))}
-            </div>
+            </form>
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-2">Icon</th>
+                  <th className="p-2">Name</th>
+                  <th className="p-2">Workers</th>
+                  <th className="p-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map((cat) => {
+                  const workerCount = workers.filter((w) => w.category === cat.name).length;
+                  return (
+                    <tr key={cat._id} className="border-t">
+                      <td className="p-2">{cat.icon || '—'}</td>
+                      <td className="p-2">{cat.name}</td>
+                      <td className="p-2">{workerCount}</td>
+                      <td className="p-2">
+                        <button
+                          onClick={() => handleDeleteCategory(cat._id)}
+                          className="text-red-600 underline"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </section>
         )}
       </main>
     </div>
   );
 }
-// inside AdminDashboard.jsx, below the browse panel
-{activeTab === 'bookings' && (
-  <section className="bg-white rounded-lg shadow p-6">
-    <h2 className="text-xl font-semibold mb-4">My Bookings</h2>
-    <p className="text-gray-600 mb-6">Track your current and upcoming service bookings</p>
-
-    <div className="space-y-4">
-      {[
-        {
-          id: 1,
-          title: 'Electrical Wiring Repair',
-          address: '123 Main St, Downtown',
-          date: '2024-01-15',
-          time: '10:00 AM',
-          price: 1500,
-          description: 'Fix faulty wiring in kitchen area. Urgent repair needed.',
-          worker: { name: 'John Smith', role: 'Electrician' },
-          status: 'in progress',
-          paid: true
-        },
-        {
-          id: 2,
-          title: 'House Deep Cleaning',
-          address: '456 Oak Ave, Suburbs',
-          date: '2024-01-12',
-          time: '2:00 PM',
-          price: 2000,
-          description: '3 bedroom house needs deep cleaning before guests arrive.',
-          worker: { name: 'Maria Garcia', role: 'House Cleaning' },
-          status: 'completed',
-          paid: true
-        },
-        {
-          id: 3,
-          title: 'Plumbing Leak Fix',
-          address: '789 Pine St, City Center',
-          date: '2024-01-20',
-          time: '9:00 AM',
-          price: 800,
-          description: 'Kitchen sink has a persistent leak that needs immediate attention.',
-          worker: null, // not assigned yet
-          status: 'pending',
-          paid: false
-        }
-      ].map((booking) => (
-        <div
-          key={booking.id}
-          className="border-l-4 border-blue-600 rounded-r-lg bg-white p-4 flex flex-col lg:flex-row lg:items-center justify-between"
-        >
-          {/* Left: booking details */}
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold">{booking.title}</h3>
-            <p className="text-gray-500 text-sm flex items-center gap-1">
-              <span>📍</span>{booking.address}
-            </p>
-            <div className="flex items-center text-gray-600 text-sm gap-4 my-2">
-              <span>📅 {booking.date}</span>
-              <span>⏰ {booking.time}</span>
-            </div>
-            <p className="text-gray-700 text-sm mb-2">{booking.description}</p>
-
-            {booking.worker ? (
-              <div className="flex items-center gap-3 text-sm">
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                  {/* avatar placeholder */}
-                  {booking.worker.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-medium">{booking.worker.name}</p>
-                  <p className="text-gray-500">{booking.worker.role}</p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500 italic">Worker not assigned yet</p>
-            )}
-          </div>
-
-          {/* Right: price & actions */}
-          <div className="mt-4 lg:mt-0 lg:ml-6 text-right space-y-2">
-            <p className="text-lg font-semibold">₹{booking.price}</p>
-            <div className="flex flex-wrap justify-end gap-2">
-              {/* Call */}
-              <button className="flex items-center gap-1 px-3 py-1 border rounded hover:bg-gray-100">
-                📞 Call
-              </button>
-              {/* Message */}
-              <button className="flex items-center gap-1 px-3 py-1 border rounded hover:bg-gray-100">
-                💬 Message
-              </button>
-              {/* Conditional action */}
-              {booking.status === 'completed' && booking.paid && (
-                <button className="flex items-center gap-1 px-3 py-1 border rounded hover:bg-gray-100">
-                  ⭐ Rate Service
-                </button>
-              )}
-              {booking.status === 'pending' && !booking.paid && (
-                <button className="px-3 py-1 border rounded text-red-600 hover:bg-gray-100">
-                  Cancel Booking
-                </button>
-              )}
-            </div>
-            {/* Status badges */}
-            <div className="flex flex-wrap justify-end gap-2 mt-1">
-              <span
-                className={`text-xs px-2 py-0.5 rounded-full uppercase ${
-                  booking.status === 'in progress'
-                    ? 'bg-purple-100 text-purple-600'
-                    : booking.status === 'completed'
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-yellow-100 text-yellow-600'
-                }`}
-              >
-                {booking.status}
-              </span>
-              <span
-                className={`text-xs px-2 py-0.5 rounded-full uppercase ${
-                  booking.paid ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'
-                }`}
-              >
-                {booking.paid ? 'paid' : 'pending'}
-              </span>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </section>
-)}

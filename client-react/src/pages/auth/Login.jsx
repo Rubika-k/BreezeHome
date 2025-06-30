@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import axios from '../../axiosConfig';        // adjust path if needed
+import axios from '../../axiosConfig';
 import { useNavigate } from 'react-router-dom';
+import side1 from '../../assets/side1.png';
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -8,76 +9,60 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     try {
-      // Call the user login endpoint
-      const res = await axios.post(
-        'http://localhost:5000/api/auth/user/login',
-        form
-      );
+      const res = await axios.post('http://localhost:5000/api/auth/login', form);
       setMessage(res.data.message);
       localStorage.setItem('token', res.data.token);
-      navigate('/dashboard');
+
+      // Use returned role for redirect
+      if (res.data.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/customer/dashboard');
+      }
     } catch (err) {
       setMessage(err.response?.data?.message || 'Login failed');
     }
   };
 
   return (
-    <div
-      className="relative min-h-screen flex items-center justify-center bg-cover bg-center px-4"
-      style={{ backgroundImage: "url('/assets/login-bg.jpg')" }}  /* optional background */
-    >
-      <div className="absolute inset-0 bg-black opacity-40"></div>
-      <div className="relative bg-white bg-opacity-90 p-6 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+    <div className="flex min-h-screen">
+      {/* Left half: image */}
+      <div
+        className="w-1/2 hidden md:block bg-cover bg-center"
+        style={{ backgroundImage: `url(${side1})` }}
+      ></div>
 
-        {message && (
-          <div className="text-red-600 mb-4 text-sm text-center">
-            {message}
-          </div>
-        )}
+      {/* Right half: form */}
+      <div className="w-full md:w-1/2 flex items-center justify-center px-4">
+        <div className="w-full max-w-md bg-blue-500 p-8 rounded shadow-md">
+          <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
+          {message && (
+            <div className="text-red-600 mb-4 text-sm text-center">{message}</div>
+          )}
 
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} className="w-full p-2 border rounded" required />
+            <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} className="w-full p-2 border rounded" required />
+            <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+              Login
+            </button>
+          </form>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-          >
-            Login
-          </button>
-        </form>
-
-        <p className="text-sm text-center mt-4">
-          Don’t have an account?{' '}
-          <a href="/signup" className="text-blue-600 hover:underline">
-            Signup
-          </a>
-        </p>
+          <p className="text-sm text-center mt-4">
+            Don’t have an account?{' '}
+            <a href="/signup" className="text-white underline hover:opacity-80">
+              Signup
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );
