@@ -30,7 +30,7 @@ function App() {
           <Route path="/customer" element={<Customer />} />
             <Route path="/profile" element={<CustomerProfile />} /> 
           {/* <Route path="/categories" element={<Categories />} /> */}
-          <Route path="/categories/:id" element={<CategoryWorkers />} />
+          <Route path="/workers" element={<CategoryWorkers />} />
           {/* <Route path="/userprofile" element={<UserProfile />} /> */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="users" element={<AdminUsers />} />

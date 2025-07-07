@@ -145,7 +145,7 @@ export default function CategoryWorkers() {
                 : "Please check back later or try another category"}
             </p>
             <button
-              onClick={() => navigate("/services")}
+              onClick={() => navigate("/")}
               className="text-blue-600 hover:underline"
             >
               Browse other services

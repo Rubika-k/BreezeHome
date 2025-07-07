@@ -27,6 +27,7 @@ const HomePage = () => {
    const [showAllServices, setShowAllServices] = useState(false);
   const [contactMsg, setContactMsg] = useState("");
   
+  
  
   // Services data with actual worker counts
   const services = [
@@ -71,43 +72,6 @@ const HomePage = () => {
       image: cleanerImg,
       key: 'cleaning',
       workers: 47
-    }
-  ];
-
-  // Professionals data (top 3 from backend)
-  const professionals = [
-    {
-      id: 1,
-      name: 'Kannan',
-      title: 'Master Electrician',
-      location: 'Kopay',
-      rating: '4.9',
-      jobs: '100+',
-      years: '5',
-      image: '', // Add actual image paths
-      category: 'electrical'
-    },
-    {
-      id: 2,
-      name: 'Aathavan',
-      title: 'Licensed Plumber',
-      location: 'Inuvil',
-      rating: '4.8',
-      jobs: '180+',
-      years: '3',
-      image: '',
-      category: 'plumbing'
-    },
-    {
-      id: 3,
-      name: 'Kovinth',
-      title: 'HVAC Technician',
-      location: 'Kopay',
-      rating: '5.0',
-      jobs: '300+',
-      years: '7',
-      image: '',
-      category: 'hvac'
     }
   ];
 
@@ -308,66 +272,6 @@ useEffect(() => {
                 </div>
                 <h4 className="font-bold text-xl mb-3 text-gray-800">{step.title}</h4>
                 <p className="text-gray-600">{step.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Professionals Section */}
-      <section className="py-20 bg-gray-50" id="professionals">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-gray-900">Top <span className="text-blue-600">Professionals</span></h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Our highest rated service providers
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {professionals.map((pro) => (
-              <div
-                key={pro.id}
-                className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group"
-              >
-                <div className="relative h-48 bg-gray-200 overflow-hidden">
-                  {/* Placeholder for professional image */}
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <svg className="w-20 h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{pro.name}</h3>
-                  <p className="text-blue-600 font-medium mb-2">{pro.title}</p>
-                  <div className="flex items-center text-gray-500 mb-4">
-                    <FaMapMarkerAlt className="mr-2" />
-                    <span>{pro.location}</span>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-2 mb-5 text-center">
-                    <div className="bg-gray-50 p-2 rounded">
-                      <div className="font-bold text-gray-800">{pro.jobs}</div>
-                      <div className="text-xs text-gray-500">Jobs</div>
-                    </div>
-                    <div className="bg-gray-50 p-2 rounded">
-                      <div className="font-bold text-gray-800">{pro.years}+</div>
-                      <div className="text-xs text-gray-500">Years</div>
-                    </div>
-                    <div className="bg-gray-50 p-2 rounded">
-                      <div className="font-bold text-gray-800">{pro.rating}</div>
-                      <div className="text-xs text-gray-500">Rating</div>
-                    </div>
-                  </div>
-                  
-                  <button 
-                    onClick={() => handleBookNow(pro)}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors"
-                  >
-                    Book Now
-                  </button>
-                </div>
               </div>
             ))}
           </div>
