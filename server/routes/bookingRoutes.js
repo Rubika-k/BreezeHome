@@ -1,30 +1,17 @@
 import express from 'express';
-import {
-  createBooking,
-  getUserBookings,
-  getAllBookings,
-  updateBookingStatus,
-  deleteBooking
-} from '../controllers/bookingController.js';
-
-import { verifyToken } from '../middlewares/authMiddleware.js';
-import { isAdmin } from '../middlewares/roleMiddleware.js';
+import { createBooking, getBookingsByUser, getAllBookings,updateBookingStatus,deleteBooking } from '../controllers/bookingController.js';
+import { verifyToken , isAdmin } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-// User creates a booking
-router.post('/', createBooking);
+router.post('/', verifyToken, createBooking);
 
-// User gets their own bookings
-router.get('/user/:id', verifyToken, getUserBookings);
+router.get('/user/:userId', verifyToken, getBookingsByUser);
 
-// Admin gets all bookings
-router.get('/', verifyToken, isAdmin, getAllBookings);
+router.get('/admin/bookings', verifyToken, isAdmin, getAllBookings);
 
-// Admin updates booking status
-router.put('/:id', verifyToken, isAdmin, updateBookingStatus);
+router.put('/:id/status', verifyToken, isAdmin, updateBookingStatus);
 
-// Admin deletes a booking
 router.delete('/:id', verifyToken, isAdmin, deleteBooking);
 
 export default router;

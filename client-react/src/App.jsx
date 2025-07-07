@@ -1,12 +1,20 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/Homepage';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
-import Customer from "./pages/Customer/Dashboard.jsx";
-import BookingForm from './pages/Customer/BookingForm';
-import Admin from './pages/admin/Dashboard.JSX';  
+import Customer from "./pages/Customer/Profile.jsx";
+import BookingForm from './pages/Customer/BookingForm.jsx';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminWorkers from './pages/admin/AdminWorkers';
+import AdminBookings from './pages/admin/AdminBookings';
+import AdminServices from './pages/admin/AdminServices';
+import AdminMessage from './pages/admin/AdminMessage';
+// import Categories from './pages/Categories';
+import CategoryWorkers from './pages/CategoryWorkers';
+// import UserProfile from './pages/UserProfile';
 import React, { useState } from 'react';
+import CustomerProfile from './pages/Customer/Profile.jsx';
 
 function App() {
   const [isSignupOpen, setIsSignupOpen] = useState(false);
@@ -19,9 +27,18 @@ function App() {
           <Route path="/booking" element={<BookingForm />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/customer/dashboard" element={<Customer />} />
-          <Route path="/admin/dashboard" element={<Admin />} />
-          {/* Add more routes as needed */}
+          <Route path="/customer" element={<Customer />} />
+            <Route path="/profile" element={<CustomerProfile />} /> 
+          {/* <Route path="/categories" element={<Categories />} /> */}
+          <Route path="/categories/:id" element={<CategoryWorkers />} />
+          {/* <Route path="/userprofile" element={<UserProfile />} /> */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="workers" element={<AdminWorkers />} />
+            <Route path="bookings" element={<AdminBookings />} />
+            <Route path="services" element={<AdminServices />} />
+            <Route path="messages" element={<AdminMessage />} />
+          </Route>
         </Routes>
       </Router>
       <div>

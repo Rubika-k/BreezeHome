@@ -4,7 +4,8 @@ import {
   getWorkerById,
   createWorker,
   updateWorker,
-  deleteWorker
+  deleteWorker,
+  getWorkersByCategory
 } from '../controllers/workerController.js';
 
 import { verifyToken } from '../middlewares/authMiddleware.js';
@@ -12,20 +13,14 @@ import { isAdmin } from '../middlewares/roleMiddleware.js';
 
 const router = express.Router();
 
-// Admin: View all workers
-router.get('/', verifyToken, isAdmin, getAllWorkers);
+// ✅ Public: get workers by category
+router.get('/category', getWorkersByCategory); // public
 
-// Admin: Get worker by ID
+// ✅ Admin-only routes: fetch all workers, etc.
+router.get('/admin', verifyToken, isAdmin, getAllWorkers);
 router.get('/:id', verifyToken, isAdmin, getWorkerById);
-
-// Admin: Add a new worker
 router.post('/', verifyToken, isAdmin, createWorker);
-
-// Admin: Update a worker
 router.put('/:id', verifyToken, isAdmin, updateWorker);
-
-// Admin: Delete a worker
 router.delete('/:id', verifyToken, isAdmin, deleteWorker);
-
 
 export default router;

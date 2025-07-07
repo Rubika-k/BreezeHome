@@ -1,61 +1,91 @@
-// controllers/bookingController.js
 import Booking from '../models/Booking.js';
-import User from '../models/User.js';
 
-// ========== CREATE BOOKINGS ==========
 export const createBooking = async (req, res) => {
   try {
-    const booking = new Booking({
-      ...req.body,
-      userId: req.user._id
+    const {
+      userId,
+      workTitle,
+      description,
+      serviceLocation,
+      preferredDate,
+      preferredTime,
+      estimatedHours,
+      urgency,
+      paymentOption
+    } = req.body;
+
+    const newBooking = new Booking({
+      userId,
+      workTitle,
+      description,
+      serviceLocation,
+      preferredDate,
+      preferredTime,
+      estimatedHours,
+      urgency,
+      paymentOption
+      
     });
 
-    await booking.save();
-    res.status(201).json(booking);
+    await newBooking.save();
+    res.status(201).json({ message: 'Booking created successfully!', booking: newBooking });
   } catch (error) {
-    console.error("Booking creation failed:", error.message);
-    res.status(400).json({ message: error.message });
+    console.error('Booking creation error:', error);
+    res.status(500).json({ message: 'Booking failed', error: error.message });
   }
 };
 
 
-// ========== GET USER BOOKINGS ==========
-export const getUserBookings = async (req, res) => {
+
+export const getBookingsByUser = async (req, res) => {
   try {
-    const bookings = await Booking.find({ userId: req.params.id }).populate('workerId');
-    if (!bookings.length) {
-      return res.status(404).json({ message: 'No bookings found for this user' });
-    }
-    res.status(200).json(bookings);
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to fetch user bookings', error: err.message });
+    const { userId } = req.params;
+
+  const bookings = await Booking.find({ userId })
+    .populate('workerId', 'fullName email phone category') // populate desired fields
+    .sort({ createdAt: -1 });
+
+  res.status(200).json(bookings);
+  } catch (error) {
+    console.error('Error fetching user bookings:', error);
+    res.status(500).json({ message: 'Failed to fetch bookings', error: error.message });
   }
 };
-// ========== GET ALL BOOKINGS ==========
+
 export const getAllBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find().populate('userId');
-    res.status(200).json(bookings);
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to fetch bookings', error: err.message });
+    const bookings = await Booking.find()
+      .populate('userId', 'fullName email')
+      .sort({ createdAt: -1 });
+
+    res.json(bookings);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ message: 'Failed to get bookings' });
   }
 };
 
-// ========== UPDATE BOOKING STATUS ==========
 export const updateBookingStatus = async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.id);
-    if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
-    }
-    booking.status = req.body.status;
+    const bookingId = req.params.id;
+    const { status } = req.body;
+
+    if (!status) return res.status(400).json({ message: 'Status is required' });
+
+    const booking = await Booking.findById(bookingId);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+
+    booking.status = status;
     await booking.save();
-    res.status(200).json({ message: 'Booking status updated', booking });
-  } catch (err) {
-    res.status(400).json({ message: 'Failed to update booking status', error: err.message });
+
+    res.status(200).json({ message: 'Status updated', booking });
+  } catch (error) {
+    console.error('Error updating booking status:', error);
+    res.status(500).json({ message: 'Failed to update status', error: error.message });
   }
 };
-// ========== DELETE BOOKING ==========
+
+
 export const deleteBooking = async (req, res) => {
   try {
     const booking = await Booking.findByIdAndDelete(req.params.id);
@@ -64,7 +94,7 @@ export const deleteBooking = async (req, res) => {
     }
     res.status(200).json({ message: 'Booking deleted successfully' });
   } catch (err) {
+    console.error('Error deleting booking:', err);
     res.status(500).json({ message: 'Failed to delete booking', error: err.message });
   }
 };
-
