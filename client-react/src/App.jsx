@@ -10,7 +10,7 @@ import AdminWorkers from './pages/admin/AdminWorkers';
 import AdminBookings from './pages/admin/AdminBookings';
 import AdminServices from './pages/admin/AdminServices';
 import AdminMessage from './pages/admin/AdminMessage';
-// import Categories from './pages/Categories';
+import Categories from './pages/Categories';
 import CategoryWorkers from './pages/CategoryWorkers';
 // import UserProfile from './pages/UserProfile';
 import React, { useState } from 'react';
@@ -29,8 +29,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/customer" element={<Customer />} />
             <Route path="/profile" element={<CustomerProfile />} /> 
-          {/* <Route path="/categories" element={<Categories />} /> */}
-          <Route path="/workers" element={<CategoryWorkers />} />
+          <Route path="/categories" element={<Categories />} />
+          <Route path="/categories/:id" element={<CategoryWorkers />} />
           {/* <Route path="/userprofile" element={<UserProfile />} /> */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="users" element={<AdminUsers />} />

@@ -2,36 +2,33 @@ import React, { useState, useEffect } from 'react';
 import axios from "../../config/axiosConfig";
 import { FiXCircle, FiCheckCircle, FiEdit2, FiTrash2 } from 'react-icons/fi';
 
+
 export default function AdminWorkers() {
   const [categories, setCategories] = useState([]);
   const [workers, setWorkers] = useState([]);
   const [formData, setFormData] = useState({
     fullName: "", email: "", phone: "",
     category: "", profilePicture: "",
-    isVerified: false,
-    registrationFeePaid: false,
-    isAvailable: true,
-    nextAvailableTime: ""
+    isVerified: false, registrationFeePaid: false,
+    isAvailable: true, nextAvailableTime: ""
   });
   const [editingWorker, setEditingWorker] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteWorker, setDeleteWorker] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  
 
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
   const [loading, setLoading] = useState({
-    categories: false,
-    workers: false,
-    form: false
+    categories: false, workers: false, form: false
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
   const defaultPic = "/default-profile.png";
 
-  // Temporary message display
   const showMessage = (type, msg) => {
     if (type === 'error') setError(msg);
     if (type === 'success') setSuccess(msg);
@@ -41,12 +38,13 @@ export default function AdminWorkers() {
     }, 3000);
   };
 
-  // Fetch categories
+  // ✅ Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       setLoading(l => ({ ...l, categories: true }));
       try {
         const res = await axios.get('/categories');
+        console.log("Fetched categories:", res.data);
         setCategories(res.data?.data || res.data || []);
       } catch (err) {
         showMessage('error', "Failed to load categories");
@@ -57,19 +55,20 @@ export default function AdminWorkers() {
     fetchCategories();
   }, []);
 
-  // Fetch workers
+  // ✅ Fetch workers
   useEffect(() => {
     const fetchWorkers = async () => {
       setLoading(l => ({ ...l, workers: true }));
-      setError(null);
       try {
         const res = await axios.get(
           selectedCategory
             ? `/workers/category?category=${selectedCategory}`
             : '/workers'
         );
+        console.log("Fetched workers:", res.data);
         setWorkers(res.data?.data || res.data || []);
       } catch (err) {
+        console.error("Error fetching workers:", err);
         showMessage('error', "Failed to load workers");
       } finally {
         setLoading(l => ({ ...l, workers: false }));
@@ -78,33 +77,25 @@ export default function AdminWorkers() {
     fetchWorkers();
   }, [selectedCategory]);
 
-  // Helper to get category name
   const getCatName = id => {
     const cat = categories.find(c => c._id === id);
     return cat ? cat.name : '-';
   };
 
-  // Add Worker
   const handleAdd = async e => {
     e.preventDefault();
     setLoading(l => ({ ...l, form: true }));
     try {
       if (!formData.category) throw new Error("Select a category");
-      const payload = { 
-        ...formData, 
-        category: formData.category, 
-        role: "worker" 
-      };
+      const payload = { ...formData, role: "worker" };
       const res = await axios.post('/workers', payload);
       setWorkers(w => [res.data?.data || res.data, ...w]);
       showMessage('success', "Worker added successfully");
       setFormData({
         fullName: "", email: "", phone: "",
         category: "", profilePicture: "",
-        isVerified: false,
-        registrationFeePaid: false,
-        isAvailable: true,
-        nextAvailableTime: ""
+        isVerified: false, registrationFeePaid: false,
+        isAvailable: true, nextAvailableTime: ""
       });
     } catch (err) {
       showMessage('error', err.response?.data?.message || err.message);
@@ -113,24 +104,19 @@ export default function AdminWorkers() {
     }
   };
 
-  // Open Edit Modal
   const openEdit = w => {
     setEditingWorker({
       ...w,
       category: w.category?._id || w.category || "",
-      nextAvailableTime: w.nextAvailableTime?.slice(0,16) || ""
+      nextAvailableTime: w.nextAvailableTime?.slice(0, 16) || ""
     });
     setEditModalOpen(true);
   };
 
-  // Save Edit
   const saveEdit = async () => {
     setLoading(l => ({ ...l, form: true }));
     try {
-      const payload = { 
-        ...editingWorker,
-        category: editingWorker.category
-      };
+      const payload = { ...editingWorker };
       const res = await axios.put(`/workers/${editingWorker._id}`, payload);
       setWorkers(w =>
         w.map(x => x._id === editingWorker._id ? (res.data?.data || res.data) : x)
@@ -144,13 +130,11 @@ export default function AdminWorkers() {
     }
   };
 
-  // Confirm Delete
   const confirmDelete = w => {
     setDeleteWorker(w);
     setDeleteModalOpen(true);
   };
 
-  // Perform Delete
   const doDelete = async () => {
     setLoading(l => ({ ...l, form: true }));
     try {
@@ -165,13 +149,14 @@ export default function AdminWorkers() {
     }
   };
 
-  // Filtered list
+  // ✅ Filtered list — always compare IDs as strings
   const list = workers
-    .filter(w => w.fullName?.toLowerCase()?.includes(search.toLowerCase()))
-    .filter(w => !selectedCategory || w.category === selectedCategory);
+    .filter(w => w.fullName?.toLowerCase().includes(search.toLowerCase()))
+    .filter(w => !selectedCategory || String(w.category) === String(selectedCategory));
 
   return (
-    <div className="p-6 space-y-6">
+    <>
+      <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Manage Workers</h1>
 
       {/* Alerts */}
@@ -506,5 +491,6 @@ export default function AdminWorkers() {
         </div>
       )}
     </div>
+    </> 
   );
-}
+} 
