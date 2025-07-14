@@ -15,6 +15,9 @@ import CategoryWorkers from './pages/CategoryWorkers';
 // import UserProfile from './pages/UserProfile';
 import React, { useState } from 'react';
 import CustomerProfile from './pages/Customer/Profile.jsx';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function App() {
   const [isSignupOpen, setIsSignupOpen] = useState(false);
@@ -22,6 +25,18 @@ function App() {
   return (
     <>
       <Router>
+         <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark" // or "dark"
+      />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/booking" element={<BookingForm />} />
@@ -42,14 +57,14 @@ function App() {
         </Routes>
       </Router>
       <div>
-        <button
+        {/* <button
           onClick={() => setIsSignupOpen(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded"
         >
           Open Signup
-        </button>
+        </button> */}
 
-        {isSignupOpen && (
+        {/* {isSignupOpen && (
           <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="relative w-full max-w-md bg-white rounded shadow-lg">
               <button
@@ -61,7 +76,7 @@ function App() {
               <Signup closeModal={() => setIsSignupOpen(false)} />
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </>
   );

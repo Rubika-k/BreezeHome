@@ -1,28 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import axios from "../../config/axiosConfig";
 import { FiXCircle, FiCheckCircle, FiEdit2, FiTrash2 } from 'react-icons/fi';
-
+import { toast } from 'react-toastify';
 
 export default function AdminWorkers() {
   const [categories, setCategories] = useState([]);
   const [workers, setWorkers] = useState([]);
   const [formData, setFormData] = useState({
-    fullName: "", email: "", phone: "",
-    category: "", profilePicture: "",
-    isVerified: false, registrationFeePaid: false,
-    isAvailable: true, nextAvailableTime: ""
+    fullName: "", 
+    email: "", 
+    phone: "",
+    category: "", 
+    profilePicture: "",
+    workExperience: "",
+    isVerified: false, 
+    registrationFeePaid: false,
+    isAvailable: true, 
+    nextAvailableTime: ""
   });
   const [editingWorker, setEditingWorker] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteWorker, setDeleteWorker] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   
-
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
   const [loading, setLoading] = useState({
-    categories: false, workers: false, form: false
+    categories: false, 
+    workers: false, 
+    form: false
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -38,13 +45,12 @@ export default function AdminWorkers() {
     }, 3000);
   };
 
-  // ✅ Fetch categories
+  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       setLoading(l => ({ ...l, categories: true }));
       try {
         const res = await axios.get('/categories');
-        console.log("Fetched categories:", res.data);
         setCategories(res.data?.data || res.data || []);
       } catch (err) {
         showMessage('error', "Failed to load categories");
@@ -55,17 +61,16 @@ export default function AdminWorkers() {
     fetchCategories();
   }, []);
 
-  // ✅ Fetch workers
+  // Fetch workers with category filter
   useEffect(() => {
     const fetchWorkers = async () => {
       setLoading(l => ({ ...l, workers: true }));
       try {
-        const res = await axios.get(
-          selectedCategory
-            ? `/workers/category?category=${selectedCategory}`
-            : '/workers'
-        );
-        console.log("Fetched workers:", res.data);
+        let url = 'workers/admin';
+        if (selectedCategory) {
+          url = `workers?category=${selectedCategory}`;
+        }
+        const res = await axios.get(url);
         setWorkers(res.data?.data || res.data || []);
       } catch (err) {
         console.error("Error fetching workers:", err);
@@ -87,18 +92,28 @@ export default function AdminWorkers() {
     setLoading(l => ({ ...l, form: true }));
     try {
       if (!formData.category) throw new Error("Select a category");
-      const payload = { ...formData, role: "worker" };
+      const payload = { 
+        ...formData, 
+        role: "worker",
+        workExperience: formData.workExperience || "No experience provided"
+      };
       const res = await axios.post('/workers', payload);
       setWorkers(w => [res.data?.data || res.data, ...w]);
-      showMessage('success', "Worker added successfully");
+      toast.success("Worker added successfully");
       setFormData({
-        fullName: "", email: "", phone: "",
-        category: "", profilePicture: "",
-        isVerified: false, registrationFeePaid: false,
-        isAvailable: true, nextAvailableTime: ""
+        fullName: "", 
+        email: "", 
+        phone: "",
+        category: "", 
+        profilePicture: "",
+        workExperience: "",
+        isVerified: false, 
+        registrationFeePaid: false,
+        isAvailable: true, 
+        nextAvailableTime: ""
       });
     } catch (err) {
-      showMessage('error', err.response?.data?.message || err.message);
+      toast.error(err.response?.data?.message || err.message);
     } finally {
       setLoading(l => ({ ...l, form: false }));
     }
@@ -149,14 +164,13 @@ export default function AdminWorkers() {
     }
   };
 
-  // ✅ Filtered list — always compare IDs as strings
+  // Filtered list
   const list = workers
     .filter(w => w.fullName?.toLowerCase().includes(search.toLowerCase()))
     .filter(w => !selectedCategory || String(w.category) === String(selectedCategory));
 
   return (
-    <>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Manage Workers</h1>
 
       {/* Alerts */}
@@ -175,7 +189,7 @@ export default function AdminWorkers() {
       <div className="flex gap-4">
         <input
           type="text"
-          placeholder="Search by name…"
+          placeholder="Search by name..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="flex-1 border p-2 rounded"
@@ -198,28 +212,35 @@ export default function AdminWorkers() {
         <h2 className="font-semibold">Add New Worker</h2>
         <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <input
-            required name="fullName" placeholder="Full Name"
+            required 
+            name="fullName" 
+            placeholder="Full Name"
             value={formData.fullName}
             onChange={e => setFormData(fd => ({ ...fd, fullName: e.target.value }))}
             className="border p-2 rounded"
             disabled={loading.form}
           />
           <input
-            required type="email" name="email" placeholder="Email"
+            required 
+            type="email" 
+            name="email" 
+            placeholder="Email"
             value={formData.email}
             onChange={e => setFormData(fd => ({ ...fd, email: e.target.value }))}
             className="border p-2 rounded"
             disabled={loading.form}
           />
           <input
-            name="phone" placeholder="Phone"
+            name="phone" 
+            placeholder="Phone"
             value={formData.phone}
             onChange={e => setFormData(fd => ({ ...fd, phone: e.target.value }))}
             className="border p-2 rounded"
             disabled={loading.form}
           />
           <select
-            required name="category"
+            required 
+            name="category"
             value={formData.category}
             onChange={e => setFormData(fd => ({ ...fd, category: e.target.value }))}
             className="border p-2 rounded"
@@ -232,14 +253,25 @@ export default function AdminWorkers() {
           </select>
 
           <input
-            name="profilePicture" placeholder="Profile Picture URL"
+            name="profilePicture" 
+            placeholder="Profile Picture URL"
             value={formData.profilePicture}
             onChange={e => setFormData(fd => ({ ...fd, profilePicture: e.target.value }))}
             className="border p-2 rounded col-span-1 md:col-span-2"
             disabled={loading.form}
           />
+          <textarea
+            name="workExperience" 
+            placeholder="Work Experience"
+            value={formData.workExperience}
+            onChange={e => setFormData(fd => ({ ...fd, workExperience: e.target.value }))}
+            className="border p-2 rounded col-span-1 md:col-span-2"
+            disabled={loading.form}
+            rows={2}
+          />
           <input
-            type="datetime-local" name="nextAvailableTime"
+            type="datetime-local" 
+            name="nextAvailableTime"
             value={formData.nextAvailableTime}
             onChange={e => setFormData(fd => ({ ...fd, nextAvailableTime: e.target.value }))}
             className="border p-2 rounded"
@@ -286,7 +318,7 @@ export default function AdminWorkers() {
         <table className="min-w-full">
           <thead className="bg-gray-100">
             <tr>
-              {['Photo','Name','Email','Phone','Category','Verified','FeePaid','Available','NextAvail','Actions'].map(h => (
+              {['Photo','Name','Email','Phone','Category','Experience','Verified','FeePaid','Available','NextAvail','Actions'].map(h => (
                 <th key={h} className="px-3 py-2 text-left text-sm font-medium text-gray-600">
                   {h}
                 </th>
@@ -296,13 +328,13 @@ export default function AdminWorkers() {
           <tbody>
             {loading.workers ? (
               <tr>
-                <td colSpan="10" className="text-center p-4">
+                <td colSpan="11" className="text-center p-4">
                   Loading workers...
                 </td>
               </tr>
             ) : list.length === 0 ? (
               <tr>
-                <td colSpan="10" className="text-center p-4 text-gray-500">
+                <td colSpan="11" className="text-center p-4 text-gray-500">
                   No workers found
                 </td>
               </tr>
@@ -317,7 +349,8 @@ export default function AdminWorkers() {
                           ? w.profilePicture
                           : defaultPic
                       }
-                      alt="" className="h-10 w-10 rounded-full object-cover"
+                      alt="" 
+                      className="h-10 w-10 rounded-full object-cover"
                       onError={e => e.target.src = defaultPic}
                     />
                   </td>
@@ -325,6 +358,9 @@ export default function AdminWorkers() {
                   <td className="px-3 py-2">{w.email}</td>
                   <td className="px-3 py-2">{w.phone || '-'}</td>
                   <td className="px-3 py-2">{getCatName(w.category)}</td>
+                  <td className="px-3 py-2 max-w-xs truncate" title={w.workExperience}>
+                    {w.workExperience || '-'}
+                  </td>
                   <td className="px-3 py-2">
                     {w.isVerified
                       ? <FiCheckCircle className="text-green-600 inline" />
@@ -420,6 +456,16 @@ export default function AdminWorkers() {
                   disabled={loading.form}
                 />
               </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm mb-1">Work Experience</label>
+                <textarea
+                  value={editingWorker.workExperience||''}
+                  onChange={e => setEditingWorker(w => ({ ...w, workExperience: e.target.value }))}
+                  className="border p-2 rounded w-full"
+                  disabled={loading.form}
+                  rows={3}
+                />
+              </div>
               { ['isVerified','registrationFeePaid','isAvailable'].map(cb => (
                 <label key={cb} className="flex items-center gap-2">
                   <input
@@ -491,6 +537,5 @@ export default function AdminWorkers() {
         </div>
       )}
     </div>
-    </> 
   );
-} 
+}

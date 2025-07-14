@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaUserPlus, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    toast.success("Logged out successfully!")
     navigate("/login");
   };
 
@@ -35,6 +37,7 @@ function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             <div className="flex space-x-8">
               {[
+                { label: "Home", path: "/" },
                 { label: "Services", href: "#services" },
                 { label: "How It Works", href: "#how-it-works" },
                 { label: "About Us", href: "#about-us" },
